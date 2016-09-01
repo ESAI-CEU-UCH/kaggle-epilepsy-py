@@ -88,7 +88,7 @@ def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
                 assert fft_tbl[i].shape[1] == FFT_SIZE
                 out_fb = filt( fft_tbl[i] )
                 out_path = out_dir + out_filename
-                np.savetxt(out_path, out_fb, delimiter=' ')
+                np.savetxt(out_path, out_fb, delimiter=' ', fmt='%.5g')
                 created_file_paths.append(out_path)
         except:
             for x in created_file_paths: os.remove(x)

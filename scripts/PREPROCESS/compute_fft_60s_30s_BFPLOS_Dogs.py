@@ -1,8 +1,9 @@
 import ESAIEpilepsyLib as elib
 from glob import glob
+from multiprocessing import Pool
 
 data_dir = "/home/experimentos/CORPORA/KAGGLE/EPILEPSY_PREDICTION/"
-out_dir = "/home/pako/tmp/epilepsy/FFT_60s_30s_BFPLOS/"
+out_dir = "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/FFT_60s_30s_BFPLOS/"
 
 elib.mkdir(out_dir)
 
@@ -17,5 +18,6 @@ filt     = elib.compute_PLOS_filter(HZ, FFT_SIZE, NUM_FB)
 all_dirs = glob(data_dir + "Dog_*/*.mat")
 
 # run in parallel
-for x in all_dirs:
-    elib.prep_fn(x,HZ,FFT_SIZE,WSIZE,WADVANCE,out_dir,filt)
+def f(x): return elib.prep_fn(x,HZ,FFT_SIZE,WSIZE,WADVANCE,out_dir,filt)
+pool = Pool(processes=4)
+result = pool.map(f, all_dirs)
