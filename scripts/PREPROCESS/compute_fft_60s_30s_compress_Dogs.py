@@ -1,6 +1,6 @@
 work_dir = "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/kaggle-epilepsy-py/"
 data_dir = "/home/experimentos/CORPORA/KAGGLE/EPILEPSY_PREDICTION/"
-out_dir = "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/FFT_60s_30s_BFPLOS/"
+out_dir = "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/FFT_60s_30s_COMPRESS/"
 
 import sys
 sys.path.append(work_dir)
@@ -17,7 +17,7 @@ WSIZE    = 60        # seconds
 WADVANCE = 30        # seconds
 FFT_SIZE = 2**14     # 16384
 NUM_FB   = 6
-filt     = elib.compute_PLOS_filter(HZ, FFT_SIZE, NUM_FB)
+filt     = elib.compress
 
 # process all dogs applying FFT + FB + logarithm
 all_dirs = glob(data_dir + "Dog_*/*.mat")

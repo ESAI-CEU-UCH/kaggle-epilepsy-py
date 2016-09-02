@@ -61,12 +61,18 @@ def load_kaggle_epilepsy_matlab_file(filename):
     """
     data = [ v for k,v in sp.io.loadmat(filename).iteritems() if k.find("segment")!=-1 ][0]
     m  = data["data"].item(0).astype(np.float32)
-    hz = data["sampling_frequency"].item(0)
+    hz = data["sampling_frequency"].item(0).item(0)
     return m,hz
 
-def squared_abs(z):
-    """Returns Re(z)^2 + Img(z)^2"""
-    return z.real**2 + z.imag**2
+def power_spectrum(z): return np.abs(z)**2
+
+def as_april(z):
+    """Computes square of zero-component and removes the last FFT value (it is
+    equivalent to the code used in APRIL-ANN.)
+
+    """
+    z[0] = np.sqrt(z[0])
+    return z[:-1]
 
 def compute_fftwh_windows(m, wsize, wadvance):
     """Given a channel data vector, applies real FFT over it using a sliding window
@@ -76,9 +82,9 @@ def compute_fftwh_windows(m, wsize, wadvance):
     nfft = 2**int(math.ceil( math.log(wsize,2) ))
     total_segments = int(math.ceil((len(m) - wsize) / wadvance))
     hamming_window = np.hamming(wsize)
-    result = np.array([ squared_abs(np.fft.rfft(np.multiply(m[k*wadvance:k*wadvance+wsize], hamming_window), nfft)) for k in xrange(total_segments) ])
+    result = np.array([ as_april(power_spectrum(np.fft.rfft(np.multiply(m[k*wadvance:k*wadvance+wsize], hamming_window), nfft))) for k in xrange(total_segments) ])
     assert result.shape[0] == total_segments
-    assert result.shape[1] == nfft//2 + 1
+    assert result.shape[1] == nfft//2
     return result
 
 def apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE):
@@ -110,7 +116,7 @@ def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
         try:
             m,hz = load_kaggle_epilepsy_matlab_file(mat_filename)
             assert( abs(hz - HZ) < 1 )
-            fft_tbl = apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE)
+            fft_tbl = apply_fft_to_all_channels(m, HZ, WSIZE, WADVANCE)
             for i,x in enumerate(fft_tbl):
                 out_filename = "%s.channel_%02d.csv.gz" % ( os.path.basename(mat_filename.replace(".mat","")), i+1 )
                 assert fft_tbl[i].shape[1] == FFT_SIZE
