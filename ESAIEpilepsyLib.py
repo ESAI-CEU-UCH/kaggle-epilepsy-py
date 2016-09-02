@@ -108,7 +108,7 @@ def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
         created_file_paths = []
         print "#",mat_filename
         try:
-            m,hz = load_matlab_file(mat_filename)
+            m,hz = load_kaggle_epilepsy_matlab_file(mat_filename)
             assert( abs(hz - HZ) < 1 )
             fft_tbl = apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE)
             for i,x in enumerate(fft_tbl):
