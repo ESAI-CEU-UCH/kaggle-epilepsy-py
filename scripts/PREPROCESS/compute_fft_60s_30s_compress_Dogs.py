@@ -43,7 +43,7 @@ NUM_FB   = 6
 filt     = elib.compress
 
 # process all dogs applying FFT + FB + logarithm
-all_dirs = glob(data_dir + "Dog_*/*.mat")
+all_dirs = sorted(glob(data_dir + "Dog_*/*.mat"))
 
 # run in parallel
 def f(x): return elib.prep_fn(x,HZ,FFT_SIZE,WSIZE,WADVANCE,out_dir,filt)

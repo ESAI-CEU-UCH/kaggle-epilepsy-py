@@ -49,7 +49,7 @@ for subject in SUBJECTS:
     center = center.squeeze()
     scale = scale.squeeze()
     def transform(x): return np.matmul(np.multiply(x - center, scale), rotation)
-    files = glob("%s/%s*channel_01*"%(FFT_DATA_PATH, subject))
+    files = sorted(glob("%s/%s*channel_01*"%(FFT_DATA_PATH, subject)))
     assert len(files) > 0
     def f(filename):
         mask = filename.replace("channel_01", "channel_??")

@@ -48,7 +48,7 @@ for subject in SUBJECTS:
     W = np.loadtxt("%s/%s_ica_W.txt"%(PCA_DATA_PATH, subject))
     center = center.squeeze()
     def transform(x): return np.matmul(np.matmul(np.multiply(x - center, K), W)
-    files = glob("%s/%s*channel_01*"%(FFT_DATA_PATH, subject))
+    files = sorted(glob("%s/%s*channel_01*"%(FFT_DATA_PATH, subject)))
     assert len(files) > 0
     def f(filename):
         mask = filename.replace("channel_01", "channel_??")
