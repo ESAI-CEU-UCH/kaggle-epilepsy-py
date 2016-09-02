@@ -103,7 +103,7 @@ def compute_fftwh_windows(m, wsize, wadvance):
 
     """
     nfft = 2**int(math.ceil( math.log(wsize,2) ))
-    total_segments = int(math.ceil((len(m) - wsize) / wadvance))
+    total_segments = int((m.shape[0] - wsize) / wadvance) + 1
     hamming_window = np.hamming(wsize)
     result = np.array([ as_april(power_spectrum(np.fft.rfft(np.multiply(m[k*wadvance:k*wadvance+wsize], hamming_window), nfft))) for k in xrange(total_segments) ])
     assert result.shape[0] == total_segments
@@ -139,7 +139,7 @@ def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
         try:
             m,hz = load_kaggle_epilepsy_matlab_file(mat_filename)
             assert( abs(hz - HZ) < 1 )
-            fft_tbl = apply_fft_to_all_channels(m, HZ, WSIZE, WADVANCE)
+            fft_tbl = apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE)
             for i,x in enumerate(fft_tbl):
                 out_filename = "%s.channel_%02d.csv.gz" % ( os.path.basename(mat_filename.replace(".mat","")), i+1 )
                 assert fft_tbl[i].shape[1] == FFT_SIZE
@@ -152,4 +152,3 @@ def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
             raise
 
 ######### END PREPROCESS SECTION ##########
-
