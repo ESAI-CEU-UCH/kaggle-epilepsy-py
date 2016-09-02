@@ -9,8 +9,10 @@ import scipy.sparse
 ######### PREPROCESS SECTION ##########
 
 def mkdir(path):
-    """ Uses os.makedirs() to be equivalent to "mkdir -p" in a console. This
-    function ignores exceptions in case the directory exists. """
+    """Uses os.makedirs() to be equivalent to "mkdir -p" in a console. This
+    function ignores exceptions in case the directory exists.
+
+    """
     try:
         os.makedirs(path)
     except OSError as exc:
@@ -18,10 +20,15 @@ def mkdir(path):
         pass
 
 def compress(m):
+    """Apply log1p compression to each data point."""
     return np.log1p(m)
 #return m:clone():clamp(1.0, (m:max())):log()
 
 def compute_PLOS_filter(HZ, FFT_SIZE, NUM_FB):
+    """Returns a filter function (receives a matrix and produces its filtered
+    result.)
+
+    """
     assert NUM_FB == 6
     BIN_WIDTH = 0.5*HZ / FFT_SIZE
     # create a bank filter matrix (sparse matrix)
@@ -47,13 +54,21 @@ def compute_PLOS_filter(HZ, FFT_SIZE, NUM_FB):
         return out
     return filt
 
-def load_matlab_file(filename):
+def load_kaggle_epilepsy_matlab_file(filename):
+    """Loads the Kaggle matlab file and returns the data matrix and the sampling
+    frequency.
+
+    """
     data = [ v for k,v in sp.io.loadmat(filename).iteritems() if k.find("segment")!=-1 ][0]
     m  = data["data"].item(0).astype(np.float32)
     hz = data["sampling_frequency"].item(0)
     return m,hz
 
-def apply_fftwh(m, wsize, wadvance):
+def compute_fftwh_windows(m, wsize, wadvance):
+    """Given a channel data vector, applies real FFT over it using a sliding window
+    of wsize and advancing wadvance steps.
+
+    """
     nfft = 2**int(math.ceil( math.log(wsize,2) ))
     total_segments = int(math.ceil((len(m) - wsize) / wadvance))
     hamming_window = np.hamming(wsize)
@@ -66,15 +81,28 @@ def apply_fftwh(m, wsize, wadvance):
         result[k] = z.real**2 + z.imag**2
     return result
 
-def compute_fft(m, hz, WSIZE, WADVANCE):
+def apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE):
+    """Receives a data matrix (with row-wise channels) and applies windowed real FFT
+    to each cannel. The function returns a Python list with the FFT result for
+    each channel.
+
+    """
     wsize,wadvance = math.floor(WSIZE*hz),math.floor(WADVANCE*hz)
     fft_tbl = []
     for i in xrange(m.shape[0]):
-        fft_tbl.append( apply_fftwh(m[i], wsize, wadvance) )
+        fft_tbl.append( compute_fftwh_windows(m[i], wsize, wadvance) )
     assert len(fft_tbl) == m.shape[0]
     return fft_tbl
 
 def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
+    """Preprocessing function. Given a Kaggle matlab file, this function computes
+    the windowed real FFT, applies the given filt function and writes the result to
+    out_dir.
+
+    In case of failure, all the related channels are deleted. If the output file
+    exists all the preprocessing is skipped.
+
+    """
     out_filename = "%s.channel_%02d.csv.gz" % ( os.path.basename(mat_filename.replace(".mat","")), 1 )
     if not os.path.exists(out_dir + out_filename):
         created_file_paths = []
@@ -82,7 +110,7 @@ def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
         try:
             m,hz = load_matlab_file(mat_filename)
             assert( abs(hz - HZ) < 1 )
-            fft_tbl = compute_fft(m, hz, WSIZE, WADVANCE)
+            fft_tbl = apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE)
             for i,x in enumerate(fft_tbl):
                 out_filename = "%s.channel_%02d.csv.gz" % ( os.path.basename(mat_filename.replace(".mat","")), i+1 )
                 assert fft_tbl[i].shape[1] == FFT_SIZE
