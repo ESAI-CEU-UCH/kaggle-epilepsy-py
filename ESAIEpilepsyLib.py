@@ -64,6 +64,10 @@ def load_kaggle_epilepsy_matlab_file(filename):
     hz = data["sampling_frequency"].item(0)
     return m,hz
 
+def squared_abs(z):
+    """Returns Re(z)^2 + Img(z)^2"""
+    return z.real**2 + z.imag**2
+
 def compute_fftwh_windows(m, wsize, wadvance):
     """Given a channel data vector, applies real FFT over it using a sliding window
     of wsize and advancing wadvance steps.
@@ -72,13 +76,9 @@ def compute_fftwh_windows(m, wsize, wadvance):
     nfft = 2**int(math.ceil( math.log(wsize,2) ))
     total_segments = int(math.ceil((len(m) - wsize) / wadvance))
     hamming_window = np.hamming(wsize)
-    result = np.zeros((total_segments, nfft//2 + 1))
-    for k in xrange(total_segments):
-        i = k*wadvance
-        j = i + wsize
-        m_hw_slice = np.multiply(m[i:j], hamming_window)
-        z = np.fft.rfft(m_hw_slice, nfft)
-        result[k] = z.real**2 + z.imag**2
+    result = np.array([ squared_abs(np.fft.rfft(np.multiply(m[k*wadvance:k*wadvance+wsize], hamming_window), nfft)) for k in xrange(total_segments) ])
+    assert result.shape[0] == total_segments
+    assert result.shape[1] == nfft//2 + 1
     return result
 
 def apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE):

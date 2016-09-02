@@ -1,10 +1,13 @@
 import ESAIEpilepsyLib as elib
 from glob import glob
 from multiprocessing import Pool
+import os
 
+work_dir = "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/kaggle-epilepsy-py/"
 data_dir = "/home/experimentos/CORPORA/KAGGLE/EPILEPSY_PREDICTION/"
 out_dir = "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/FFT_60s_30s_BFPLOS/"
 
+os.chdir(work_dir)
 elib.mkdir(out_dir)
 
 HZ       = 400
