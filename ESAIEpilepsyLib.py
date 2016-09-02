@@ -90,7 +90,7 @@ def load_kaggle_epilepsy_matlab_file(filename):
 def power_spectrum(z): return np.abs(z)**2
 
 def as_april(z):
-    """Computes square of zero-component and removes the last FFT value (it is
+    """Computes square root of zero-component and removes the last FFT value (it is
     equivalent to the code used in APRIL-ANN.)
 
     """
