@@ -15,3 +15,7 @@ bfplos_patients_id=$(enqueue_job "./steps/02_bfplos_preprocessing_patients.sh")
 enqueue_job "./steps/03_compress_preprocessing_dogs.sh"
 enqueue_job "./steps/04_compress_preprocessing_patients.sh"
 enqueue_conditioned_job "$bfplos_dogs_id:$bfplos_patients_id" "./steps/05_do_bfplos_pca.sh"
+enqueue_conditioned_job "$bfplos_dogs_id:$bfplos_patients_id" "./steps/06_do_bfplos_ica.sh"
+enqueue_job "./steps/07_do_corw.sh"
+enqueue_job "./steps/08_do_corg.sh"
+enqueue_job "./steps/09_do_covarred.sh"
