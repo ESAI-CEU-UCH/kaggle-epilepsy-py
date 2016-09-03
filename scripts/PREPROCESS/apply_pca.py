@@ -31,6 +31,7 @@ NUM_CORES     = 4
 import sys
 sys.path.append(WORK_DIR)
 import ESAIEpilepsyLib as elib
+from functools import partial
 from glob import glob
 from multiprocessing import Pool
 import numpy as np
@@ -39,8 +40,20 @@ import os
 os.chdir(WORK_DIR)
 elib.mkdir(OUTPUT_PATH)
 
-pool = Pool(processes=4)
+def transform(center, scale, rotation, x):
+    return np.matmul(np.multiply(x - center, scale), rotation)
 
+def transform_all_channels(center, scale, rotation, filename):
+    mask = filename.replace("channel_01", "channel_??")
+    outname = "%s/%s.csv.gz"%(OUTPUT_PATH,
+                              os.path.basename(filename).replace(".channel_01.csv.gz",""))
+    if not os.path.exists(outname):
+        m = np.concatenate([ np.loadtxt(x) for x in sorted(glob(mask)) ], axis=1)
+        out = transform(center, scale, rotation, m)
+        np.savetxt(outname, out, delimiter=' ', fmt='%.5g')
+
+pool = Pool(processes=4)
+        
 for subject in SUBJECTS:
     print "# " + subject
     center = np.loadtxt("%s/%s_pca_center.txt"%(PCA_DATA_PATH, subject))
@@ -48,16 +61,7 @@ for subject in SUBJECTS:
     rotation = np.loadtxt("%s/%s_pca_rotation.txt"%(PCA_DATA_PATH, subject))
     center = center.squeeze()
     scale = scale.squeeze()
-    def transform(x): return np.matmul(np.multiply(x - center, scale), rotation)
     files = sorted(glob("%s/%s*channel_01*"%(FFT_DATA_PATH, subject)))
     assert len(files) > 0
-    def f(filename):
-        mask = filename.replace("channel_01", "channel_??")
-        outname = "%s/%s.csv.gz"%(OUTPUT_PATH,
-                                  os.path.basename(filename).replace(".channel_01.csv.gz",""))
-        if not os.path.exists(outname):
-            m = np.concatenate([ np.loadtxt(x) for x in sorted(glob(mask)) ], axis=1)
-            out = transform(m)
-            np.savetxt(outname, out, delimiter=' ', fmt='%.5g')
-        
+    f = partial(transform_all_channels, center, scale, rotation)
     result = pool.map(f, files)
