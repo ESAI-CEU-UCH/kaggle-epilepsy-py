@@ -117,10 +117,7 @@ def apply_fft_to_all_channels(m, hz, WSIZE, WADVANCE):
 
     """
     wsize,wadvance = math.floor(WSIZE*hz),math.floor(WADVANCE*hz)
-    fft_tbl = []
-    for i in xrange(m.shape[0]):
-        fft_tbl.append( compute_fftwh_windows(m[i], wsize, wadvance) )
-    assert len(fft_tbl) == m.shape[0]
+    fft_tbl = [ compute_fftwh_windows(m[i], wsize, wadvance) for i in xrange(m.shape[0]) ]
     return fft_tbl
 
 def prep_fn(mat_filename, HZ, FFT_SIZE, WSIZE, WADVANCE, out_dir, filt):
