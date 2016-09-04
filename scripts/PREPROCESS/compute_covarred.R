@@ -31,7 +31,10 @@ library(doMC)
 registerDoMC(Sys.getenv("OMP_NUM_THREADS"))  # the number of CPU cores
 subjects <- c("Dog_1", "Dog_2", "Dog_3", "Dog_4", "Dog_5", "Patient_1", "Patient_2")
 sources <- "/home/experimentos/CORPORA/KAGGLE/EPILEPSY_PREDICTION/"
-destinationPath <- "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/COVRED/"
+workingDir <- "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/"
+destinationPath <- paste(workingDir, "COVRED/", sep="")
+
+dir.create(file.path(workingDir, "COVRED"), showWarnings = FALSE)
 
 #freqbase <- 400
 ncoefs <- 15 # Number of elements in Fourier basis

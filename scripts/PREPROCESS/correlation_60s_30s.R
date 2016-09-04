@@ -27,7 +27,10 @@ library(MASS)
 
 subjects <- c("Dog_1", "Dog_2", "Dog_3", "Dog_4", "Dog_5", "Patient_1", "Patient_2")
 sources <- "/home/experimentos/CORPORA/KAGGLE/EPILEPSY_PREDICTION/"
-destinationPath <- "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/CORW/"
+workingDir <- "/home/experimentos/KAGGLE/EPILEPSY_PREDICTION_IN_PYTHON/"
+destinationPath <- paste(workingDir, "CORW/", sep="")
+
+dir.create(file.path(workingDir, "CORW"), showWarnings = FALSE)
 
 wsize <- 60
 wadvance <- 30
