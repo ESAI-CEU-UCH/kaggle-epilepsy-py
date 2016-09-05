@@ -29,6 +29,8 @@ import scipy as sp
 import scipy.io
 import scipy.sparse
 
+SUBJECTS = [ "Dog_1", "Dog_2", "Dog_3", "Dog_4", "Dog_5", "Patient_1", "Patient_2" ]
+
 ######### PREPROCESS SECTION ##########
 
 def mkdir(path):
