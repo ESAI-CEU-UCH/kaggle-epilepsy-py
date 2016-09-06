@@ -69,7 +69,7 @@ def compute_PLOS_filter(HZ, FFT_SIZE, NUM_FB):
     for i in xrange(NUM_FB):
         ini = math.ceil(limits[i][0] / BIN_WIDTH)
         fin = math.floor(limits[i][1] / BIN_WIDTH) + 1
-        sz  = fin - ini + 1
+        sz  = fin - ini
         fb[ini:fin,i].fill(1/sz)
     fb = sp.sparse.csc_matrix(fb)
     def filt(m):
